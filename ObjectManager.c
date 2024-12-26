@@ -1,7 +1,10 @@
 #include "ObjectManager.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 
-
+typedef struct MEMORY_CELL cell;
 typedef struct MEMORY_CELL{
     Ref ref;
     ulong size;
@@ -44,6 +47,8 @@ void initPool(){
 }
 //-------------------
 
+static void destroyList();
+
 // Destructor
 void destroyPool(){
     destroyList();
@@ -65,13 +70,10 @@ void compact();
 Ref createCell(ulong);
 
 Ref insertObject( ulong size ){
-    Ref newObjRef = NULL;
+    Ref newObjRef = 0;
     if(MEMORY_SIZE-takenSpace < size) compact(); // checks if there are unused memory sells and fixes them
-
-    if(MEMORY_SIZE-takenSpace >= size){
-    // some stuff goes on here
+    if(MEMORY_SIZE-takenSpace > size){
         newObjRef = createCell(size);
-
     } else {
         printf("Unable to successfully complete memory allocation request.\n\n");
     }
@@ -132,6 +134,7 @@ void compact(){
 }
 
 Ref createCell(ulong size){
+
     cell* newObject = (cell*)malloc(sizeof(cell));
     newObject->ref = refCounter;
     refCounter++;
@@ -141,19 +144,34 @@ Ref createCell(ulong size){
     freePtr = (char*)freePtr + size;
     newObject->next = NULL;
     takenSpace += size;
+
+    // Adding new cell to the list of cells
+    if(top == NULL){
+        top = newObject;
+    } else {
+        cell* curr = top;
+        while(curr->next != NULL){
+            curr = curr->next;
+        }
+        curr->next = newObject;
+    }
+
     return newObject->ref;
 }
 //-------------------
 
 // returns a pointer to the object being requested given by the reference id
-void *retrieveObject( Ref ref ){
+void* retrieveObject( Ref ref ){
+    checkReference(ref);
     void* object = NULL;
     cell* curr = top;
     while(curr != NULL){
         if(curr->ref == ref){
             object = curr->cellAdress;
         }
+        curr = curr->next;
     }
+    return object;
 }
 //-------------------
 

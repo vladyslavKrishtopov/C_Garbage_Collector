@@ -2,12 +2,9 @@
 #define _OBJECT_MANAGER_H
 
 #ifndef MEMORY_SIZE
-#define MEMORY_SIZE 1024*512
+#define MEMORY_SIZE 1024*24
 #endif
 
-#ifndef NULL
-#define NULL 0
-#endif
 
 typedef unsigned long Ref;
 typedef unsigned long ulong;
@@ -20,10 +17,11 @@ void initPool();
 void destroyPool();
 
 // inserts an object in the pool
+// if the pool is full then it returns 0
 Ref insertObject( ulong size );
 
 // returns a pointer to the object being requested given by the reference id
-void *retrieveObject( Ref ref );
+void* retrieveObject( Ref ref );
 
 // update our index to indicate that we have another reference to the given object
 void addReference( Ref ref );
